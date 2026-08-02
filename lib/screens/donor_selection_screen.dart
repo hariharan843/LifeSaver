@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'donor_registration_screen.dart';
 import 'organisations_registration_screen.dart';
-
-
 class DonorSelectionScreen extends StatelessWidget {
   const DonorSelectionScreen({super.key});
 

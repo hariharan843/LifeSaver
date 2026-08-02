@@ -14,9 +14,35 @@ class PatientRequestScreen extends StatelessWidget {
     }
   }
 
+  Widget buildInfoRow(
+      String title,
+      String value,
+      ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(value),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
+    final String userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
       appBar: AppBar(
@@ -39,9 +65,7 @@ class PatientRequestScreen extends StatelessWidget {
             return const Center(
               child: Text(
                 "No Requests Found",
-                style: TextStyle(
-                  fontSize: 18,
-                ),
+                style: TextStyle(fontSize: 18),
               ),
             );
           }
@@ -50,7 +74,10 @@ class PatientRequestScreen extends StatelessWidget {
             padding: const EdgeInsets.all(15),
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
-              var request = snapshot.data!.docs[index];
+              final request = snapshot.data!.docs[index];
+              final data = request.data() as Map<String, dynamic>;
+
+              final String status = data["status"] ?? "Pending";
 
               return Card(
                 elevation: 5,
@@ -61,38 +88,82 @@ class PatientRequestScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "🩸 Blood Request",
+                        "Blood Request",
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                           color: Colors.red.shade700,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Blood Group: ${request["bloodGroup"]}",
+
+                      const SizedBox(height: 15),
+
+                      buildInfoRow(
+                        "Patient Name",
+                        data["patientName"] ?? "N/A",
                       ),
-                      Text(
-                        "Hospital: ${request["hospital"]}",
+
+                      buildInfoRow(
+                        "Blood Group",
+                        data["bloodGroup"] ?? "N/A",
                       ),
-                      Text(
-                        "Location: ${request["location"]}",
+
+                      buildInfoRow(
+                        "Hospital",
+                        data["hospital"] ?? "N/A",
                       ),
-                      Text(
-                        "Units Required: ${request["units"]}",
+
+                      buildInfoRow(
+                        "Location",
+                        data["location"] ?? "N/A",
                       ),
-                      Text(
-                        "Emergency: ${request["emergencyLevel"]}",
+
+                      buildInfoRow(
+                        "Units Required",
+                        data["units"]?.toString() ?? "N/A",
                       ),
-                      const SizedBox(height: 10),
+
+                      const SizedBox(height: 8),
+
                       Text(
-                        "Status: ${request["status"]}",
-                        style: const TextStyle(
+                        "Status: $status",
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          color: status == "Completed"
+                              ? Colors.green
+                              : status == "Pending"
+                              ? Colors.orange
+                              : Colors.blue,
                         ),
                       ),
-                      if (request["status"] == "Donor Found") ...[
-                        const Divider(),
+
+                      if (data["organisationName"] != null) ...[
+                        const SizedBox(height: 15),
+
+                        const Text(
+                          "Handled By",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        Text(
+                          data["organisationName"],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+
+                      if (status == "Donor Found" ||
+                          status == "Completed") ...[
+                        const Divider(height: 30),
+
                         const Text(
                           "Donor Details",
                           style: TextStyle(
@@ -100,25 +171,39 @@ class PatientRequestScreen extends StatelessWidget {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text(
-                          "Name: ${request["donorName"]}",
-                        ),
-                        Text(
-                          "Phone: ${request["donorPhone"]}",
-                        ),
+
                         const SizedBox(height: 10),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            callDonor(
-                              request["donorPhone"],
-                            );
-                          },
-                          icon: const Icon(Icons.phone),
-                          label: const Text("Call Donor"),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                          ),
+
+                        buildInfoRow(
+                          "Name",
+                          data["donorName"] ?? "Not Available",
                         ),
+
+                        buildInfoRow(
+                          "Phone",
+                          data["donorPhone"] ?? "Not Available",
+                        ),
+
+                        const SizedBox(height: 10),
+
+                        if (data["donorPhone"] != null)
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                callDonor(data["donorPhone"]);
+                              },
+                              icon: const Icon(Icons.phone),
+                              label: const Text("Call Donor"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ],
                   ),

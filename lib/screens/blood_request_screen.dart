@@ -12,7 +12,7 @@ class BloodRequestScreen extends StatefulWidget {
 
 class _BloodRequestScreenState extends State<BloodRequestScreen> {
 String selectedBloodGroup = "A+";
-String selectedEmergency = "Critical";
+
 
 final TextEditingController nameController =
 TextEditingController();
@@ -42,7 +42,6 @@ await _firestore.collection("blood_requests").add({
 "hospital": hospitalController.text.trim(),
 "location": locationController.text.trim(),
 "phone": phoneController.text.trim(),
-"emergencyLevel": selectedEmergency,
 "status": "Pending",
 "createdAt": Timestamp.now(),
 });
@@ -107,29 +106,20 @@ locationController.text
 print("Location matched");
 
 await _firestore
-.collection("notifications")
-.doc(donor.id)
-.collection("requests")
-.doc(requestRef.id)
-.set({
-"patientName":
-nameController.text.trim(),
-"bloodGroup":
-selectedBloodGroup,
-"hospital":
-hospitalController.text.trim(),
-"location":
-locationController.text.trim(),
-"units":
-unitsController.text.trim(),
-"emergencyLevel":
-selectedEmergency,
-"status":
-"Pending",
-"isRead":
-false,
-"createdAt":
-Timestamp.now(),
+    .collection("notifications")
+    .doc(donor.id)
+    .collection("requests")
+    .doc(requestRef.id)
+    .set({
+  "requestId": requestRef.id,
+  "patientName": nameController.text.trim(),
+  "bloodGroup": selectedBloodGroup,
+  "hospital": hospitalController.text.trim(),
+  "location": locationController.text.trim(),
+  "phone": phoneController.text.trim(),
+  "units": unitsController.text.trim(),
+  "isRead": false,
+  "createdAt": Timestamp.now(),
 });
 
 print(
@@ -318,51 +308,6 @@ keyboard:
 TextInputType.phone,
 ),
 
-const Text(
-"Emergency Level",
-style: TextStyle(
-fontSize: 18,
-fontWeight:
-FontWeight.bold,
-),
-),
-
-const SizedBox(height: 10),
-
-DropdownButtonFormField<String>(
-value: selectedEmergency,
-
-decoration:
-inputDecoration(
-"Priority",
-).copyWith(
-prefixIcon:
-const Icon(
-Icons.warning,
-),
-),
-
-items: [
-"Critical",
-"Urgent",
-"Normal",
-].map((level) {
-
-return DropdownMenuItem(
-value: level,
-child: Text(level),
-);
-
-}).toList(),
-
-onChanged: (value) {
-
-setState(() {
-selectedEmergency = value!;
-});
-
-},
-),
 
 const SizedBox(height: 30),
 

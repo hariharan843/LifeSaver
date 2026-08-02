@@ -7,6 +7,7 @@ import '../widgets/service_card.dart';
 import 'blood_request_screen.dart';
 import 'donor_selection_screen.dart';
 import 'donor_registration_screen.dart';
+import 'organisation_dashboard_screen.dart';
 import 'organisations_registration_screen.dart';
 import 'profile_screen.dart';
 import 'donor_notification_screen.dart';
@@ -72,6 +73,25 @@ return await FirebaseFirestore.instance
 .collection("donors")
 .doc(uid)
 .get();
+
+}
+Future<bool> checkOrganisationExists() async {
+
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user == null) {
+    return false;
+  }
+
+
+  final snapshot =
+  await FirebaseFirestore.instance
+      .collection("organisations")
+      .doc(user.uid)
+      .get();
+
+
+  return snapshot.exists;
 
 }
 
@@ -580,14 +600,22 @@ height: 30,
             title: "Become Donor",
             subtitle: "Register to donate blood",
             color: const Color(0xff2E7D32),
+
             onTap: () {
+
               Navigator.push(
+
                 context,
+
                 MaterialPageRoute(
+
                   builder: (_) =>
                   const DonorSelectionScreen(),
+
                 ),
+
               );
+
             },
           ),
         ),
@@ -620,24 +648,135 @@ height: 30,
 
   const SizedBox(height: 15),
 
-  SizedBox(
-    width: double.infinity,
-    height: 190,
-    child: ServiceCard(
-      icon: Icons.person,
-      title: "Profile",
-      subtitle: "Manage your account",
-      color: const Color(0xff6A1B9A),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) =>
-            const ProfileScreen(),
+  FutureBuilder<bool>(
+
+    future: checkOrganisationExists(),
+
+    builder: (context, snapshot) {
+
+
+      bool hasOrganisation =
+          snapshot.data ?? false;
+
+
+      return Column(
+
+        children: [
+
+
+          Row(
+
+            children: [
+
+
+              Expanded(
+
+                child: SizedBox(
+
+                  height:190,
+
+                  child: ServiceCard(
+
+                    icon: Icons.person,
+
+                    title: "Profile",
+
+                    subtitle:
+                    "Manage your account",
+
+                    color:
+                    const Color(0xff6A1B9A),
+
+
+                    onTap: () {
+
+                      Navigator.push(
+
+                        context,
+
+                        MaterialPageRoute(
+
+                          builder: (_) =>
+                          const ProfileScreen(),
+
+                        ),
+
+                      );
+
+                    },
+
+                  ),
+
+                ),
+
+              ),
+
+
+
+              if(hasOrganisation)
+
+                ...[
+                  const SizedBox(width:15),
+
+
+                  Expanded(
+
+                    child: SizedBox(
+
+                      height:190,
+
+                      child: ServiceCard(
+
+                        icon: Icons.business,
+
+                        title: "Organisation",
+
+                        subtitle:
+                        "Manage organisation",
+
+                        color:
+                        const Color(0xff1565C0),
+
+
+                        onTap: () {
+
+                          Navigator.push(
+
+                            context,
+
+                            MaterialPageRoute(
+
+                              builder: (_) =>
+                              const OrganisationDashboardScreen(),
+
+                            ),
+
+                          );
+
+                        },
+
+                      ),
+
+                    ),
+
+                  ),
+
+                ],
+
+
+            ],
+
+
           ),
-        );
-      },
-    ),
+
+
+        ],
+
+      );
+
+
+    },
+
   ),
 
   const SizedBox(height: 30),

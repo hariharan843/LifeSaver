@@ -99,26 +99,23 @@ class _OrganisationRegistrationScreenState
 
 
 
-      final donorRef =
+      final organisationRef =
       FirebaseFirestore.instance
-          .collection("donors")
+          .collection("organisations")
           .doc(user.uid);
 
 
-
-      final donorSnapshot =
-      await donorRef.get();
-
+      final organisationSnapshot =
+      await organisationRef.get();
 
 
-      if (donorSnapshot.exists) {
-
+      if (organisationSnapshot.exists) {
 
         ScaffoldMessenger.of(context).showSnackBar(
 
           const SnackBar(
             content: Text(
-                "You are already registered as a coordinator"),
+                "Organisation profile already exists"),
             backgroundColor: Colors.orange,
           ),
 
@@ -128,12 +125,11 @@ class _OrganisationRegistrationScreenState
       }
 
 
+      await organisationRef.set({
+        "ownerUid": user.uid,
 
 
-      await donorRef.set({
-
-
-        "donorType": widget.organisationType,
+        "organisationType": widget.organisationType,
 
 
         "name":
