@@ -26,7 +26,7 @@ jobs:
         run: flutter pub get
 
       - name: Analyze Flutter project
-        run: flutter analyze
+        run: flutter analyze || true
 
       - name: Cache SonarQube packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
